@@ -1,72 +1,115 @@
--- [[ POTO1 HUB v59 - CORRECCIÓN DE TALAR SINCRONIZADO ]]
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 
-_G.PotoConfig = {Talar = false, Fire = false, Noclip = false, Speed = false, SpdVal = 16}
+_G.AutoFire = false
+_G.AutoTalar = false
+_G.SPEED_ON = false
+_G.NOCLIP_ON = false -- Variable para el Noclip
+_G.SPD_VAL = 16 
 
+-- INTERFAZ (TU DISEÑO ORIGINAL V58)
 local pgui = LP:WaitForChild("PlayerGui")
-if pgui:FindFirstChild("PotoHub") then pgui.PotoHub:Destroy() end
+if pgui:FindFirstChild("FinalDelta_V58") then pgui.FinalDelta_V58:Destroy() end
 
-local sg = Instance.new("ScreenGui", pgui); sg.Name = "PotoHub"
+local sg = Instance.new("ScreenGui", pgui); sg.Name = "FinalDelta_V58"
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 180, 0, 310); main.Position = UDim2.new(0.1, 0, 0.4, 0)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); main.Active = true; main.Draggable = true
+main.Size = UDim2.new(0, 180, 0, 320); main.Position = UDim2.new(0.1, 0, 0.4, 0) -- Ajusté un poco el alto para el nuevo botón
+main.BackgroundColor3 = Color3.new(0, 0, 0); main.Active = true; main.Draggable = true
 
-local function btn(txt, y, cb)
+local function btn(txt, y, x, sizeX, cb)
     local b = Instance.new("TextButton", main)
-    b.Size = UDim2.new(0.9, 0, 0, 35); b.Position = UDim2.new(0.05, 0, 0, y)
-    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(35, 35, 35); b.TextColor3 = Color3.new(1, 1, 1)
+    b.Size = UDim2.new(sizeX, 0, 0, 35); b.Position = UDim2.new(x, 0, 0, y)
+    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(40, 40, 40); b.TextColor3 = Color3.new(1, 1, 1)
     b.MouseButton1Click:Connect(function() cb(b) end)
     return b
 end
 
-btn("AUTO TALAR: OFF", 15, function(b) _G.PotoConfig.Talar = not _G.PotoConfig.Talar; b.Text = "TALAR: "..(_G.PotoConfig.Talar and "ON" or "OFF") end)
-btn("NOCLIP: OFF", 55, function(b) _G.PotoConfig.Noclip = not _G.PotoConfig.Noclip; b.Text = "NOCLIP: "..(_G.PotoConfig.Noclip and "ON" or "OFF") end)
-btn("AUTO FIRE: OFF", 95, function(b) _G.PotoConfig.Fire = not _G.PotoConfig.Fire; b.Text = "FIRE: "..(_G.PotoConfig.Fire and "ON" or "OFF") end)
-btn("SPEED: OFF", 135, function(b) _G.PotoConfig.Speed = not _G.PotoConfig.Speed; b.Text = "SPEED: "..(_G.PotoConfig.Speed and "ON" or "OFF") end)
+-- BOTONES ORIGINALES + NOCLIP
+btn("AUTO TALAR: OFF", 15, 0.05, 0.9, function(b) 
+    _G.AutoTalar = not _G.AutoTalar
+    b.Text = "TALAR: " .. (_G.AutoTalar and "ON" or "OFF")
+end)
 
--- LÓGICA DE MOVIMIENTO
+btn("AUTO FIRE: OFF", 55, 0.05, 0.9, function(b) 
+    _G.AutoFire = not _G.AutoFire
+    b.Text = "FIRE: " .. (_G.AutoFire and "ON" or "OFF")
+end)
+
+btn("NOCLIP: OFF", 95, 0.05, 0.9, function(b) 
+    _G.NOCLIP_ON = not _G.NOCLIP_ON
+    b.Text = "NOCLIP: " .. (_G.NOCLIP_ON and "ON" or "OFF")
+end)
+
+btn("SPEED: OFF", 135, 0.05, 0.9, function(b) 
+    _G.SPEED_ON = not _G.SPEED_ON
+    b.Text = "SPEED: " .. (_G.SPEED_ON and "ON" or "OFF")
+end)
+
+local spdLabel = btn("VALOR: " .. _G.SPD_VAL, 175, 0.05, 0.9, function() end)
+
+btn("-5", 215, 0.05, 0.42, function() 
+    _G.SPD_VAL = math.max(16, _G.SPD_VAL - 5)
+    spdLabel.Text = "VALOR: " .. _G.SPD_VAL
+end)
+
+btn("+5", 215, 0.53, 0.42, function() 
+    _G.SPD_VAL = _G.SPD_VAL + 5
+    spdLabel.Text = "VALOR: " .. _G.SPD_VAL
+end)
+
+btn("CERRAR", 265, 0.05, 0.9, function() sg:Destroy() _G.SPEED_ON=false _G.AutoTalar=false _G.NOCLIP_ON=false end)
+
+-- LÓGICA DE MOVIMIENTO (SPEED + NOCLIP UNIFICADOS)
 RS.Stepped:Connect(function()
     pcall(function()
-        if LP.Character and _G.PotoConfig.Noclip then
-            for _, p in pairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
-        end
-        if LP.Character and _G.PotoConfig.Speed and LP.Character:FindFirstChild("HumanoidRootPart") then
-            local hum = LP.Character:FindFirstChild("Humanoid")
-            if hum and hum.MoveDirection.Magnitude > 0 then
-                LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (hum.MoveDirection * ((_G.PotoConfig.SpdVal - 16) / 35))
+        if LP.Character then
+            -- Lógica de Noclip
+            if _G.NOCLIP_ON then
+                for _, part in pairs(LP.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.CanCollide then
+                        part.CanCollide = false
+                    end
+                end
+            end
+            -- Tu lógica de Speed original
+            if _G.SPEED_ON and LP.Character:FindFirstChild("HumanoidRootPart") then
+                local hum = LP.Character:FindFirstChild("Humanoid")
+                if hum and hum.MoveDirection.Magnitude > 0 then
+                    LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (hum.MoveDirection * ((_G.SPD_VAL - 16) / 30))
+                end
             end
         end
     end)
 end)
 
--- LÓGICA DE FARMEO CORREGIDA
+-- MOTOR DE JUEGO ORIGINAL (TALAR Y FIRE)
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.2) do
         pcall(function()
-            if _G.PotoConfig.Talar then
-                local rem = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
-                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
-                if tool and rem then
-                    for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
-                        local trees = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
-                        local tree = trees and trees:FindFirstChildWhichIsA("Model")
-                        if tree and tree:FindFirstChild("Health") then
-                            -- AQUÍ ESTÁ EL TRUCO: Bajamos la vida de 1 en 1 respetando al servidor
-                            local h_val = tree.Health.Value
-                            if h_val > 0 then
-                                rem:FireServer(tree, "tree", h_val - 1)
-                                tool:Activate()
-                            end
-                            break
+            local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
+
+            if _G.AutoTalar and tool and remote then
+                for _, island in pairs(workspace._Debris.Islands:GetChildren()) do
+                    local trees = island:FindFirstChild("Objects") and island.Objects:FindFirstChild("Trees")
+                    local tree = trees and trees:FindFirstChildWhichIsA("Model")
+                    if tree then
+                        for i = 43, 1, -2 do
+                            if not _G.AutoTalar or not tree.Parent then break end
+                            remote:FireServer(tree, "tree", i)
+                            tool:Activate()
                         end
+                        break
                     end
                 end
             end
-            if _G.PotoConfig.Fire then
+
+            if _G.AutoFire then
                 local base = workspace._Raft.Campfire.Base
                 for _, log in pairs(workspace._Carryables:GetChildren()) do
-                    if log.Name == "Log" then (log:FindFirstChild("Part") or log).CFrame = base.CFrame end
+                    if log.Name == "Log" then
+                        (log:FindFirstChild("Part") or log).CFrame = base.CFrame
+                    end
                 end
             end
         end)
