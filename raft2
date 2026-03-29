@@ -1,19 +1,20 @@
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 
+-- VARIABLES GLOBALES
 _G.AutoFire = false
 _G.AutoTalar = false
 _G.SPEED_ON = false
-_G.NOCLIP_ON = false -- Variable para el Noclip
+_G.NOCLIP_ON = false
 _G.SPD_VAL = 16 
 
--- INTERFAZ (TU DISEÑO ORIGINAL V58)
+-- INTERFAZ (DISEÑO V58 UNIFICADO)
 local pgui = LP:WaitForChild("PlayerGui")
 if pgui:FindFirstChild("FinalDelta_V58") then pgui.FinalDelta_V58:Destroy() end
 
 local sg = Instance.new("ScreenGui", pgui); sg.Name = "FinalDelta_V58"
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 180, 0, 320); main.Position = UDim2.new(0.1, 0, 0.4, 0) -- Ajusté un poco el alto para el nuevo botón
+main.Size = UDim2.new(0, 180, 0, 350); main.Position = UDim2.new(0.1, 0, 0.4, 0)
 main.BackgroundColor3 = Color3.new(0, 0, 0); main.Active = true; main.Draggable = true
 
 local function btn(txt, y, x, sizeX, cb)
@@ -24,7 +25,7 @@ local function btn(txt, y, x, sizeX, cb)
     return b
 end
 
--- BOTONES ORIGINALES + NOCLIP
+-- BOTONES
 btn("AUTO TALAR: OFF", 15, 0.05, 0.9, function(b) 
     _G.AutoTalar = not _G.AutoTalar
     b.Text = "TALAR: " .. (_G.AutoTalar and "ON" or "OFF")
@@ -57,21 +58,21 @@ btn("+5", 215, 0.53, 0.42, function()
     spdLabel.Text = "VALOR: " .. _G.SPD_VAL
 end)
 
-btn("CERRAR", 265, 0.05, 0.9, function() sg:Destroy() _G.SPEED_ON=false _G.AutoTalar=false _G.NOCLIP_ON=false end)
+btn("TP BASE", 260, 0.05, 0.9, function() 
+    pcall(function() LP.Character.HumanoidRootPart.CFrame = workspace._Raft.Campfire.Base.CFrame + Vector3.new(0, 5, 0) end) 
+end)
 
--- LÓGICA DE MOVIMIENTO (SPEED + NOCLIP UNIFICADOS)
+btn("CERRAR", 305, 0.05, 0.9, function() sg:Destroy() end)
+
+-- LÓGICA DE MOVIMIENTO (SPEED + NOCLIP)
 RS.Stepped:Connect(function()
     pcall(function()
         if LP.Character then
-            -- Lógica de Noclip
             if _G.NOCLIP_ON then
                 for _, part in pairs(LP.Character:GetDescendants()) do
-                    if part:IsA("BasePart") and part.CanCollide then
-                        part.CanCollide = false
-                    end
+                    if part:IsA("BasePart") then part.CanCollide = false end
                 end
             end
-            -- Tu lógica de Speed original
             if _G.SPEED_ON and LP.Character:FindFirstChild("HumanoidRootPart") then
                 local hum = LP.Character:FindFirstChild("Humanoid")
                 if hum and hum.MoveDirection.Magnitude > 0 then
@@ -82,36 +83,48 @@ RS.Stepped:Connect(function()
     end)
 end)
 
--- MOTOR DE JUEGO ORIGINAL (TALAR Y FIRE)
+-- MOTOR HYPER-DRIVE (TALAR Y FIRE)
 task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            local tool = LP.Character:FindFirstChildWhichIsA("Tool")
-            local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
-
-            if _G.AutoTalar and tool and remote then
-                for _, island in pairs(workspace._Debris.Islands:GetChildren()) do
-                    local trees = island:FindFirstChild("Objects") and island.Objects:FindFirstChild("Trees")
-                    local tree = trees and trees:FindFirstChildWhichIsA("Model")
-                    if tree then
-                        for i = 43, 1, -2 do
-                            if not _G.AutoTalar or not tree.Parent then break end
-                            remote:FireServer(tree, "tree", i)
-                            tool:Activate()
+    while task.wait(0.05) do 
+        -- AUTO-TALAR HYPER-BURST
+        if _G.AutoTalar then
+            pcall(function()
+                local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                
+                if remote and tool then
+                    local targetTree = nil
+                    for _, island in pairs(workspace._Debris.Islands:GetChildren()) do
+                        local trees = island:FindFirstChild("Objects") and island.Objects:FindFirstChild("Trees")
+                        if trees then
+                            targetTree = trees:FindFirstChildWhichIsA("Model")
+                            if targetTree then break end
                         end
-                        break
+                    end
+
+                    if targetTree then
+                        -- Secuencia de ráfaga rápida
+                        for i = 43, 1, -5 do 
+                            if not targetTree.Parent or not _G.AutoTalar then break end
+                            remote:FireServer(targetTree, "tree", i)
+                            remote:FireServer(targetTree, "tree", i-1)
+                            remote:FireServer(targetTree, "tree", i-2)
+                            if i == 43 then tool:Activate() end
+                            task.wait() 
+                        end
                     end
                 end
-            end
+            end)
+        end
 
-            if _G.AutoFire then
+        -- AUTO-FIRE
+        if _G.AutoFire then
+            pcall(function()
                 local base = workspace._Raft.Campfire.Base
                 for _, log in pairs(workspace._Carryables:GetChildren()) do
-                    if log.Name == "Log" then
-                        (log:FindFirstChild("Part") or log).CFrame = base.CFrame
-                    end
+                    if log.Name == "Log" then (log:FindFirstChild("Part") or log).CFrame = base.CFrame end
                 end
-            end
-        end)
+            end)
+        end
     end
 end)
