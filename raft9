@@ -1,12 +1,11 @@
--- [[ POTO1 HUB - PREMIUM V7.0 + KILL AURA ]]
+-- [[ POTO1 HUB - PREMIUM V8.0 FINAL KILL ALL ]]
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 local TS = game:GetService("TweenService")
 
 -- VARIABLES GLOBALES
 _G.AutoFire = false; _G.AutoTalar = false; _G.KillAura = false
-_G.SPEED_ON = false; _G.NOCLIP_ON = false
-_G.SPD_VAL = 16 
+_G.SPEED_ON = false; _G.NOCLIP_ON = false; _G.SPD_VAL = 16 
 
 local Themes = {
     Background = Color3.fromRGB(20, 20, 20), SideBar = Color3.fromRGB(25, 25, 25),
@@ -23,17 +22,17 @@ Main.Size = UDim2.new(0, 420, 0, 280); Main.Position = UDim2.new(0.5, -210, 0.5,
 Main.BackgroundColor3 = Themes.Background; Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- SIDEBAR Y TOPBAR (ESTABLE V6)
+-- SIDEBAR Y TOPBAR
 local SideBar = Instance.new("Frame", Main); SideBar.ZIndex = 2; SideBar.Size = UDim2.new(0, 60, 1, 0); SideBar.BackgroundColor3 = Themes.SideBar; SideBar.BorderSizePixel = 0
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
 local SideItems = Instance.new("Frame", SideBar); SideItems.Size = UDim2.new(1, 0, 1, -40); SideItems.Position = UDim2.new(0, 0, 0, 40); SideItems.BackgroundTransparency = 1; SideItems.ZIndex = 4
-Instance.new("UIListLayout", SideItems).Padding = UDim.new(0, 10); SideItems.UIListLayout.HorizontalAlignment = "Center"
+local Layout = Instance.new("UIListLayout", SideItems); Layout.Padding = UDim.new(0, 10); Layout.HorizontalAlignment = "Center"
 
 local TopBar = Instance.new("Frame", Main); TopBar.Size = UDim2.new(1, -60, 0, 35); TopBar.Position = UDim2.new(0, 60, 0, 0); TopBar.BackgroundColor3 = Themes.TopBar; TopBar.BorderSizePixel = 0
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
-local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | PREMIUM V7"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
+local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | PREMIUM V8 FINAL"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
--- FUNCIONES DE BOTONES (CERRAR/MIN)
+-- FUNCIONES DE BOTONES
 local function sysBtn(t, p, c, cb)
     local b = Instance.new("TextButton", TopBar); b.Text = t; b.Size = UDim2.new(0, 30, 0, 30); b.Position = p; b.BackgroundColor3 = c; b.TextColor3 = Themes.Text; b.Font = "GothamBold"; Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5); b.MouseButton1Click:Connect(cb)
 end
@@ -51,7 +50,7 @@ end
 local HomePage = createPage("Home"); HomePage.Visible = true
 local PlayerPage = createPage("Player")
 
--- ICONOS LATERALES
+-- ICONOS LATERALES (ZINDEX FIJADO)
 local currentTab = nil
 local function createTabBtn(id, pName)
     local b = Instance.new("TextButton", SideItems); b.Size = UDim2.new(0, 45, 0, 45); b.BackgroundColor3 = Themes.SideBar; b.Text = ""; b.ZIndex = 5
@@ -67,11 +66,10 @@ local bH = createTabBtn("10723380068", "Home"); currentTab = bH; bH.BackgroundCo
 createTabBtn("10747373733", "Player")
 
 -- COMPONENTES (TOGGLES)
-local function createToggle(txt, parent, var, cb)
+local function createToggle(txt, parent, var)
     local f = Instance.new("Frame", parent); f.Size = UDim2.new(0.98, 0, 0, 40); f.BackgroundColor3 = Themes.Accent; Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
     local l = Instance.new("TextLabel", f); l.Text = "  "..txt; l.Size = UDim2.new(0.7, 0, 1, 0); l.BackgroundTransparency = 1; l.TextColor3 = Themes.Text; l.Font = "Gotham"; l.TextSize = 12; l.TextXAlignment = "Left"
-    local bt = Instance.new("TextButton", f); bt.Text = ""; bt.Size = UDim2.new(0, 40, 0, 20); bt.Position = UDim2.new(1, -50, 0.5, -10); bt.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    Instance.new("UICorner", bt).CornerRadius = UDim.new(1, 0)
+    local bt = Instance.new("TextButton", f); bt.Text = ""; bt.Size = UDim2.new(0, 40, 0, 20); bt.Position = UDim2.new(1, -50, 0.5, -10); bt.BackgroundColor3 = Color3.fromRGB(80, 80, 80); Instance.new("UICorner", bt).CornerRadius = UDim.new(1, 0)
     local c = Instance.new("Frame", bt); c.Size = UDim2.new(0, 16, 0, 16); c.Position = UDim2.new(0, 2, 0.5, -8); c.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", c).CornerRadius = UDim.new(1, 0)
     bt.MouseButton1Click:Connect(function()
         _G[var] = not _G[var]
@@ -80,31 +78,31 @@ local function createToggle(txt, parent, var, cb)
     end)
 end
 
--- CONTENIDO HOME (RECURSOS)
+-- CONTENIDO HUB
 createToggle("Auto Talar (Hyper)", HomePage, "AutoTalar")
 createToggle("Auto Fogata", HomePage, "AutoFire")
-createToggle("Kill Aura (Shark/Enemy)", HomePage, "KillAura") -- NUEVA FUNCIÓN
-local tpB = Instance.new("TextButton", HomePage); tpB.Size = UDim2.new(0.98, 0, 0, 35); tpB.BackgroundColor3 = Themes.Accent; tpB.Text = "Teleport a Base"; tpB.TextColor3 = Themes.Text; tpB.Font = "Gotham"; tpB.TextSize = 12; Instance.new("UICorner", tpB).CornerRadius = UDim.new(0, 6)
-tpB.MouseButton1Click:Connect(function() pcall(function() LP.Character.HumanoidRootPart.CFrame = workspace._Raft.Campfire.Base.CFrame + Vector3.new(0, 5, 0) end) end)
-
--- CONTENIDO PLAYER
+createToggle("Kill Aura TOTAL", HomePage, "KillAura") -- MATA TODO
 createToggle("Noclip", PlayerPage, "NOCLIP_ON")
 createToggle("Speed Hack", PlayerPage, "SPEED_ON")
 
--- LÓGICA HYPER-DRIVE + KILL AURA
+-- LÓGICA KILL AURA TOTAL (MULTITARGET)
 task.spawn(function()
     while task.wait(0.1) do
-        -- KILL AURA (Ataca Tiburones y Enemigos cercanos)
         if _G.KillAura then
             pcall(function()
-                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                local char = LP.Character
+                local tool = char:FindFirstChildWhichIsA("Tool")
+                -- Buscamos AxeHit (madera/balsa) o SwordHit (daño general)
                 local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit") or game:GetService("ReplicatedStorage"):FindFirstChild("SwordHit")
+                
                 if tool and remote then
-                    for _, enemy in pairs(workspace._Debris:GetDescendants()) do
-                        if enemy:IsA("Model") and (enemy.Name:find("Shark") or enemy.Name:find("Enemy")) then
-                            local root = enemy:FindFirstChild("HumanoidRootPart") or enemy:FindFirstChild("Base")
-                            if root and (LP.Character.HumanoidRootPart.Position - root.Position).Magnitude < 25 then
-                                remote:FireServer(enemy, "animal", 10)
+                    -- Escanea TODO el workspace en busca de enemigos
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if obj:IsA("Humanoid") and obj.Parent ~= char then
+                            local root = obj.Parent:FindFirstChild("HumanoidRootPart") or obj.Parent:FindFirstChild("Base")
+                            if root and (char.HumanoidRootPart.Position - root.Position).Magnitude < 30 then
+                                -- Ataca con fuerza 100 para matar rápido
+                                remote:FireServer(obj.Parent, "animal", 100) 
                                 tool:Activate()
                             end
                         end
@@ -112,7 +110,6 @@ task.spawn(function()
                 end
             end)
         end
-        -- AUTO FOGATA
         if _G.AutoFire then
             pcall(function()
                 local b = workspace._Raft.Campfire.Base
@@ -122,7 +119,7 @@ task.spawn(function()
     end
 end)
 
--- AUTO TALAR HYPER (Ciclo rápido independiente)
+-- AUTO TALAR HYPER (Independiente)
 task.spawn(function()
     while task.wait(0.05) do
         if _G.AutoTalar then
@@ -130,16 +127,12 @@ task.spawn(function()
                 local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
                 local tool = LP.Character:FindFirstChildWhichIsA("Tool")
                 if remote and tool then
-                    local target = nil
                     for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
                         local trees = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
-                        if trees then target = trees:FindFirstChildWhichIsA("Model"); if target then break end end
-                    end
-                    if target then
-                        for i = 43, 1, -5 do 
-                            if not target.Parent or not _G.AutoTalar then break end
-                            remote:FireServer(target, "tree", i); if i == 43 then tool:Activate() end
-                            task.wait() 
+                        local target = trees and trees:FindFirstChildWhichIsA("Model")
+                        if target then
+                            remote:FireServer(target, "tree", 43)
+                            tool:Activate(); break
                         end
                     end
                 end
@@ -148,7 +141,7 @@ task.spawn(function()
     end
 end)
 
--- MOVIMIENTO (Speed/Noclip)
+-- MOVIMIENTO
 RS.Stepped:Connect(function()
     pcall(function()
         if LP.Character then
