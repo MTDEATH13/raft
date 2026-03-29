@@ -1,0 +1,254 @@
+local LP = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+
+-- VARIABLES GLOBALES (Mantenemos las tuyas)
+_G.AutoFire = false; _G.AutoTalar = false
+_G.SPEED_ON = false; _G.NOCLIP_ON = false
+_G.SPD_VAL = 16 
+
+-- CONFIGURACIÓN DE COLORES (Estilo image_4)
+local Themes = {
+    Background = Color3.fromRGB(25, 25, 25),
+    SideBar = Color3.fromRGB(20, 20, 20),
+    TopBar = Color3.fromRGB(30, 30, 30),
+    Text = Color3.fromRGB(240, 240, 240),
+    Accent = Color3.fromRGB(50, 50, 50), -- Color de botones
+    ToggleOn = Color3.fromRGB(0, 170, 100), -- Verde Roblox
+}
+
+-- 1. CREACIÓN DE LA BASE DEL HUB PREMIUM
+local pgui = LP:WaitForChild("PlayerGui")
+if pgui:FindFirstChild("Poto1_MaterialHub") then pgui.Poto1_MaterialHub:Destroy() end
+
+local sg = Instance.new("ScreenGui", pgui); sg.Name = "Poto1_MaterialHub"; sg.ResetOnSpawn = false
+local Main = Instance.new("Frame", sg)
+Main.Size = UDim2.new(0, 420, 0, 280); Main.Position = UDim2.new(0.5, -210, 0.5, -140)
+Main.BackgroundColor3 = Themes.Background; Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true
+Main.ClipsDescendants = true -- IMPORTANTE PARA MINIMIZAR BIEN
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+
+-- SOMBRA SUTIL (OPCIONAL PERO DA TOQUE)
+local shadow = Instance.new("ImageLabel", Main)
+shadow.Name = "Shadow"; shadow.AnchorPoint = Vector2.new(0.5, 0.5); shadow.Position = UDim2.new(0.5, 0, 0.5, 2)
+shadow.Size = UDim2.new(1, 10, 1, 10); shadow.BackgroundTransparency = 1; shadow.Image = "rbxassetid://1316045217"
+shadow.ImageColor3 = Color3.new(0,0,0); shadow.ImageTransparency = 0.5; shadow.ZIndex = 0
+
+-- 2. BARRA SUPERIOR ESTILO LIBRARY
+local TopBar = Instance.new("Frame", Main)
+TopBar.Size = UDim2.new(1, 0, 0, 35); TopBar.BackgroundColor3 = Themes.TopBar; TopBar.BorderSizePixel = 0
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", TopBar)
+Title.Text = "  POTO1 HUB | PREMIUM V5"; Title.Size = UDim2.new(0.7, 0, 1, 0); Title.BackgroundTransparency = 1
+Title.TextColor3 = Themes.Text; Title.Font = Enum.Font.GothamBold; Title.TextSize = 14; Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- BOTONES DE CONTROL (LIMPIOS)
+local function createSysBtn(txt, pos, col, cb)
+    local b = Instance.new("TextButton", TopBar)
+    b.Text = txt; b.Size = UDim2.new(0, 30, 0, 30); b.Position = pos
+    b.BackgroundColor3 = col; b.TextColor3 = Themes.Text; b.BorderSizePixel = 0; b.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
+    b.MouseButton1Click:Connect(cb); return b
+end
+
+createSysBtn("X", UDim2.new(1, -35, 0, 2), Color3.fromRGB(180, 50, 50), function() sg:Destroy() end)
+
+local minBtn = createSysBtn("-", UDim2.new(1, -70, 0, 2), Themes.Accent, nil)
+local isMin = false
+minBtn.MouseButton1Click:Connect(function()
+    isMin = not isMin
+    minBtn.Text = isMin and "+" or "-"
+    local targetSize = isMin and UDim2.new(0, 420, 0, 35) or UDim2.new(0, 420, 0, 280)
+    TS:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize}):Play()
+end)
+
+-- 3. BARRA LATERAL (SIDEBAR) ESTILO LIBRARY
+local SideBar = Instance.new("Frame", Main)
+SideBar.Size = UDim2.new(0, 100, 1, -35); SideBar.Position = UDim2.new(0, 0, 0, 35)
+SideBar.BackgroundColor3 = Themes.SideBar; SideBar.BorderSizePixel = 0
+
+local sideCorner = Instance.new("UICorner", SideBar); sideCorner.CornerRadius = UDim.new(0, 10)
+-- Ajuste para que solo redondee las esquinas izquierdas
+local sideHide = Instance.new("Frame", SideBar) -- Tapa el redondeado derecho
+sideHide.Size = UDim2.new(0, 10, 1, 0); sideHide.Position = UDim2.new(1, -10, 0, 0); sideHide.BackgroundColor3 = Themes.SideBar; sideHide.BorderSizePixel = 0
+
+local SideLayout = Instance.new("UIListLayout", SideBar)
+SideLayout.Padding = UDim.new(0, 5); SideLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; SideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- 4. CONTENEDOR DE PÁGINAS (TABS)
+local Container = Instance.new("Frame", Main)
+Container.Size = UDim2.new(1, -110, 1, -45); Container.Position = UDim2.new(0, 105, 0, 40); Container.BackgroundTransparency = 1
+
+local Pages = {}
+local function createPage(name, order)
+    local f = Instance.new("ScrollingFrame", Container)
+    f.Size = UDim2.new(1, 0, 1, 0); f.BackgroundTransparency = 1; f.Visible = false; f.ScrollBarThickness = 2
+    f.CanvasSize = UDim2.new(0, 0, 0, 0); f.ScrollBarImageColor3 = Themes.Accent
+    local layout = Instance.new("UIListLayout", f); layout.Padding = UDim.new(0, 6); layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    Pages[name] = f; return f
+end
+
+local HomePage = createPage("Home", 1)
+local PlayerPage = createPage("Player", 2)
+HomePage.Visible = true -- Página por defecto
+
+-- 5. BOTONES LATERALES (Iconos limpios rbxassetid)
+local currentTabBtn = nil
+local function createTabBtn(txt, iconId, pageName)
+    local b = Instance.new("TextButton", SideBar)
+    b.Size = UDim2.new(0.9, 0, 0, 35); b.BackgroundColor3 = Themes.SideBar; b.BorderSizePixel = 0; b.Text = ""
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    
+    local img = Instance.new("ImageLabel", b)
+    img.Size = UDim2.new(0, 20, 0, 20); img.Position = UDim2.new(0, 8, 0.5, -10); img.BackgroundTransparency = 1
+    img.Image = "rbxassetid://"..iconId; img.ImageColor3 = Color3.new(0.7,0.7,0.7)
+
+    local lbl = Instance.new("TextLabel", b)
+    lbl.Text = txt; lbl.Size = UDim2.new(1, -35, 1, 0); lbl.Position = UDim2.new(0, 30, 0, 0)
+    lbl.BackgroundTransparency = 1; lbl.TextColor3 = Color3.new(0.7,0.7,0.7); lbl.Font = Enum.Font.Gotham; lbl.TextSize = 12
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+    b.MouseButton1Click:Connect(function()
+        for _, p in pairs(Pages) do p.Visible = false end
+        Pages[pageName].Visible = true
+        if currentTabBtn then TS:Create(currentTabBtn, TweenInfo.new(0.2), {BackgroundColor3 = Themes.SideBar}):Play() end
+        currentTabBtn = b
+        TS:Create(b, TweenInfo.new(0.2), {BackgroundColor3 = Themes.Accent}):Play()
+    end)
+    return b
+end
+
+-- Creamos los botones con iconos estilo image_4
+local bH = createTabBtn("Recursos", "10723380068", "Home") -- Icono Caja/Recursos
+local bP = createTabBtn("Jugador", "10747373733", "Player") -- Icono Persona
+
+-- Resaltar el primero
+currentTabBtn = bH; bH.BackgroundColor3 = Themes.Accent
+
+-- 6. ELEMENTOS DE INTERFAZ (Toggles y Botones estilo Moderno)
+local function createToggle(txt, parent, varName, callback)
+    local f = Instance.new("Frame", parent)
+    f.Size = UDim2.new(0.98, 0, 0, 40); f.BackgroundColor3 = Themes.Accent; f.BorderSizePixel = 0
+    Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
+    
+    local lbl = Instance.new("TextLabel", f)
+    lbl.Text = "  "..txt; lbl.Size = UDim2.new(0.7, 0, 1, 0); lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Themes.Text; lbl.Font = Enum.Font.Gotham; lbl.TextSize = 12; lbl.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local btnT = Instance.new("TextButton", f)
+    btnT.Text = ""; btnT.Size = UDim2.new(0, 45, 0, 22); btnT.Position = UDim2.new(1, -55, 0.5, -11)
+    btnT.BackgroundColor3 = Color3.fromRGB(80, 80, 80); btnT.BorderSizePixel = 0
+    Instance.new("UICorner", btnT).CornerRadius = UDim.new(1, 0) -- Switch redondo
+    
+    local circle = Instance.new("Frame", btnT)
+    circle.Size = UDim2.new(0, 18, 0, 18); circle.Position = UDim2.new(0, 2, 0.5, -9)
+    circle.BackgroundColor3 = Color3.new(1,1,1); circle.BorderSizePixel = 0
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+    
+    -- Actualizar estado inicial
+    if _G[varName] then
+        btnT.BackgroundColor3 = Themes.ToggleOn
+        circle.Position = UDim2.new(1, -20, 0.5, -9)
+    end
+
+    btnT.MouseButton1Click:Connect(function()
+        _G[varName] = not _G[varName]
+        local on = _G[varName]
+        TS:Create(btnT, TweenInfo.new(0.2), {BackgroundColor3 = on and Themes.ToggleOn or Color3.fromRGB(80, 80, 80)}):Play()
+        TS:Create(circle, TweenInfo.new(0.2), {Position = on and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)}):Play()
+        if callback then callback(on) end
+    end)
+    return f
+end
+
+local function createSimpleBtn(txt, parent, cb)
+    local b = Instance.new("TextButton", parent)
+    b.Size = UDim2.new(0.98, 0, 0, 35); b.BackgroundColor3 = Themes.Accent; b.Text = txt
+    b.TextColor3 = Themes.Text; b.Font = Enum.Font.Gotham; b.TextSize = 12
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    b.MouseButton1Click:Connect(cb); return b
+end
+
+-- CONTENIDO PÁGINA HOME (Recursos)
+createToggle("Auto Talar (Hyper)", HomePage, "AutoTalar")
+createToggle("Auto Fogata", HomePage, "AutoFire")
+createSimpleBtn("Teleport a Base", HomePage, function() 
+    pcall(function() LP.Character.HumanoidRootPart.CFrame = workspace._Raft.Campfire.Base.CFrame + Vector3.new(0, 5, 0) end) 
+end)
+
+-- CONTENIDO PÁGINA PLAYER
+createToggle("Noclip", PlayerPage, "NOCLIP_ON")
+createToggle("Speed Hack", PlayerPage, "SPEED_ON")
+
+local spdFrame = Instance.new("Frame", PlayerPage)
+spdFrame.Size = UDim2.new(0.98, 0, 0, 60); spdFrame.BackgroundTransparency = 1
+
+local spdLbl = Instance.new("TextLabel", spdFrame)
+spdLbl.Text = "Velocidad: 16"; spdLbl.Size = UDim2.new(1, 0, 0, 20); spdLbl.TextColor3 = Themes.Text; spdLbl.BackgroundTransparency = 1; spdLbl.Font = Enum.Font.Gotham
+
+local function spdBtn(txt, x, cb)
+    local b = Instance.new("TextButton", spdFrame)
+    b.Text = txt; b.Size = UDim2.new(0.48, 0, 0, 35); b.Position = UDim2.new(x, 0, 0, 25)
+    b.BackgroundColor3 = Themes.Accent; b.TextColor3 = Themes.Text; b.Font = Enum.Font.Gotham
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+    b.MouseButton1Click:Connect(cb)
+end
+
+spdBtn("-5", 0, function() _G.SPD_VAL = math.max(16, _G.SPD_VAL - 5); spdLbl.Text = "Velocidad: ".._G.SPD_VAL end)
+spdBtn("+5", 0.52, function() _G.SPD_VAL = _G.SPD_VAL + 5; spdLbl.Text = "Velocidad: ".._G.SPD_VAL end)
+
+-- 7. TUS LÓGICAS HYPER-DRIVE (SIN TOCAR)
+RS.Stepped:Connect(function()
+    pcall(function()
+        if LP.Character then
+            if _G.NOCLIP_ON then
+                for _, part in pairs(LP.Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end
+            end
+            if _G.SPEED_ON and LP.Character:FindFirstChild("HumanoidRootPart") then
+                local hum = LP.Character:FindFirstChild("Humanoid")
+                if hum and hum.MoveDirection.Magnitude > 0 then
+                    LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (hum.MoveDirection * ((_G.SPD_VAL - 16) / 30))
+                end
+            end
+        end
+    end)
+end)
+
+task.spawn(function()
+    while task.wait(0.05) do 
+        if _G.AutoTalar then
+            pcall(function()
+                local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                if remote and tool then
+                    local targetTree = nil
+                    for _, island in pairs(workspace._Debris.Islands:GetChildren()) do
+                        local trees = island:FindFirstChild("Objects") and island.Objects:FindFirstChild("Trees")
+                        if trees then
+                            targetTree = trees:FindFirstChildWhichIsA("Model")
+                            if targetTree then break end
+                        end
+                    end
+
+                    if targetTree then
+                        for i = 43, 1, -5 do 
+                            if not targetTree.Parent or not _G.AutoTalar then break end
+                            remote:FireServer(targetTree, "tree", i); remote:FireServer(targetTree, "tree", i-1); remote:FireServer(targetTree, "tree", i-2)
+                            if i == 43 then tool:Activate() end
+                            task.wait() 
+                        end
+                    end
+                end
+            end)
+        end
+        if _G.AutoFire then
+            pcall(function()
+                local base = workspace._Raft.Campfire.Base
+                for _, log in pairs(workspace._Carryables:GetChildren()) do
+                    if log.Name == "Log" then (log:FindFirstChild("Part") or log).CFrame = base.CFrame end
+                end
+            end)
+        end
+    end
+end)
