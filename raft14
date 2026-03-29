@@ -1,9 +1,8 @@
--- [[ POTO1 HUB - V12 RESTORED (SPEED & TP BASE) ]]
+-- [[ POTO1 HUB - V13.1 REPARADO TOTAL ]]
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 local TS = game:GetService("TweenService")
 
--- VARIABLES REESTABLECIDAS
 _G.AutoTalar = false
 _G.AutoFire = false
 _G.SPEED_ON = false
@@ -19,12 +18,10 @@ local Themes = {
     On = Color3.fromRGB(0, 180, 100)
 }
 
--- LIMPIEZA
 local pgui = LP:WaitForChild("PlayerGui")
-if pgui:FindFirstChild("Poto1_V12") then pgui.Poto1_V11:Destroy() end
+if pgui:FindFirstChild("Poto1_V13") then pgui.Poto1_V13:Destroy() end
 
--- INTERFAZ ORIGINAL
-local sg = Instance.new("ScreenGui", pgui); sg.Name = "Poto1_V12"; sg.ResetOnSpawn = false
+local sg = Instance.new("ScreenGui", pgui); sg.Name = "Poto1_V13"; sg.ResetOnSpawn = false
 local Main = Instance.new("Frame", sg)
 Main.Size = UDim2.new(0, 420, 0, 280); Main.Position = UDim2.new(0.5, -210, 0.5, -140)
 Main.BackgroundColor3 = Themes.Background; Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true
@@ -35,20 +32,15 @@ local SideBar = Instance.new("Frame", Main); SideBar.Size = UDim2.new(0, 60, 1, 
 local SideItems = Instance.new("Frame", SideBar); SideItems.Size = UDim2.new(1, 0, 1, -40); SideItems.Position = UDim2.new(0, 0, 0, 40); SideItems.BackgroundTransparency = 1
 Instance.new("UIListLayout", SideItems).HorizontalAlignment = "Center"; SideItems.UIListLayout.Padding = UDim.new(0, 10)
 
--- TOPBAR (CON BOTONES X Y -)
+-- TOPBAR (BOTONES X Y - RESTAURADOS)
 local TopBar = Instance.new("Frame", Main); TopBar.Size = UDim2.new(1, -60, 0, 35); TopBar.Position = UDim2.new(0, 60, 0, 0); TopBar.BackgroundColor3 = Themes.TopBar; TopBar.BorderSizePixel = 0
-local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | V12 RECOVERY"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
+local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | V13 REPARADO"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
--- BOTÓN CERRAR (ROJO)
 local closeB = Instance.new("TextButton", TopBar); closeB.Text = "X"; closeB.Size = UDim2.new(0, 30, 0, 30); closeB.Position = UDim2.new(1, -35, 0, 2.5); closeB.BackgroundColor3 = Color3.fromRGB(180, 50, 50); closeB.TextColor3 = Themes.Text; closeB.Font = "GothamBold"; Instance.new("UICorner", closeB).CornerRadius = UDim.new(0, 5)
 closeB.MouseButton1Click:Connect(function() sg:Destroy() end)
 
--- BOTÓN MINIMIZAR
 local minB = Instance.new("TextButton", TopBar); minB.Text = "-"; minB.Size = UDim2.new(0, 30, 0, 30); minB.Position = UDim2.new(1, -70, 0, 2.5); minB.BackgroundColor3 = Themes.Accent; minB.TextColor3 = Themes.Text; minB.Font = "GothamBold"; Instance.new("UICorner", minB).CornerRadius = UDim.new(0, 5)
-minB.MouseButton1Click:Connect(function() 
-    _G.IsMin = not _G.IsMin
-    TS:Create(Main, TweenInfo.new(0.3), {Size = _G.IsMin and UDim2.new(0, 420, 0, 35) or UDim2.new(0, 420, 0, 280)}):Play()
-end)
+minB.MouseButton1Click:Connect(function() _G.IsMin = not _G.IsMin; TS:Create(Main, TweenInfo.new(0.3), {Size = _G.IsMin and UDim2.new(0, 420, 0, 35) or UDim2.new(0, 420, 0, 280)}):Play() end)
 
 -- PAGINAS
 local Container = Instance.new("Frame", Main); Container.Size = UDim2.new(1, -70, 1, -45); Container.Position = UDim2.new(0, 65, 0, 40); Container.BackgroundTransparency = 1
@@ -67,7 +59,7 @@ local function createTab(id, pName)
 end
 createTab("10723380068", "Home"); createTab("10747373733", "Player")
 
--- FUNCIONES DE INTERFAZ
+-- FUNCIONES UI
 local function createToggle(txt, parent, var)
     local f = Instance.new("Frame", parent); f.Size = UDim2.new(0.98, 0, 0, 38); f.BackgroundColor3 = Themes.Accent; Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
     local l = Instance.new("TextLabel", f); l.Text = "  "..txt; l.Size = UDim2.new(0.7, 0, 1, 0); l.BackgroundTransparency = 1; l.TextColor3 = Themes.Text; l.Font = "Gotham"; l.TextSize = 12; l.TextXAlignment = "Left"
@@ -75,11 +67,9 @@ local function createToggle(txt, parent, var)
     bt.MouseButton1Click:Connect(function() _G[var] = not _G[var]; bt.BackgroundColor3 = _G[var] and Themes.On or Color3.fromRGB(80, 80, 80) end)
 end
 
--- SPEED CON +5 Y -5
 local function createSpeedControl(parent)
     local f = Instance.new("Frame", parent); f.Size = UDim2.new(0.98, 0, 0, 45); f.BackgroundColor3 = Themes.Accent; Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
     local l = Instance.new("TextLabel", f); l.Text = "  Velocidad: " .. _G.SPD_VAL; l.Size = UDim2.new(0.5, 0, 1, 0); l.BackgroundTransparency = 1; l.TextColor3 = Themes.Text; l.Font = "GothamBold"; l.TextSize = 12; l.TextXAlignment = "Left"
-    
     local function addB(t, x, amt)
         local b = Instance.new("TextButton", f); b.Text = t; b.Size = UDim2.new(0, 35, 0, 30); b.Position = UDim2.new(1, x, 0.5, -15); b.BackgroundColor3 = Themes.TopBar; b.TextColor3 = Themes.Text; b.Font = "GothamBold"; Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
         b.MouseButton1Click:Connect(function() _G.SPD_VAL = math.clamp(_G.SPD_VAL + amt, 16, 250); l.Text = "  Velocidad: " .. _G.SPD_VAL end)
@@ -87,35 +77,35 @@ local function createSpeedControl(parent)
     addB("+5", -40, 5); addB("-5", -80, -5)
 end
 
--- BOTÓN TP BASE
-local function createButton(txt, parent, cb)
-    local b = Instance.new("TextButton", parent); b.Size = UDim2.new(0.98, 0, 0, 38); b.BackgroundColor3 = Themes.Accent; b.Text = txt; b.TextColor3 = Themes.Text; b.Font = "GothamBold"; b.TextSize = 12; Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    b.MouseButton1Click:Connect(cb)
-end
-
--- CONTENIDO HOME
-createToggle("Auto Talar (Islands)", Home, "AutoTalar")
+-- CONTENIDO
+createToggle("Auto Talar (Full Fix)", Home, "AutoTalar")
 createToggle("Auto Fogata", Home, "AutoFire")
-createButton("Teleport a Base", Home, function()
-    if workspace:FindFirstChild("_Raft") and workspace._Raft:FindFirstChild("Campfire") then
-        LP.Character.HumanoidRootPart.CFrame = workspace._Raft.Campfire.Base.CFrame + Vector3.new(0, 5, 0)
-    end
-end)
+local tpB = Instance.new("TextButton", Home); tpB.Size = UDim2.new(0.98, 0, 0, 38); tpB.BackgroundColor3 = Themes.Accent; tpB.Text = "Teleport a Base"; tpB.TextColor3 = Themes.Text; tpB.Font = "GothamBold"; Instance.new("UICorner", tpB).CornerRadius = UDim.new(0, 6)
+tpB.MouseButton1Click:Connect(function() if workspace:FindFirstChild("_Raft") then LP.Character.HumanoidRootPart.CFrame = workspace._Raft.Campfire.Base.CFrame + Vector3.new(0, 5, 0) end end)
 
--- CONTENIDO PLAYER
 createToggle("Activar Speed", Player, "SPEED_ON")
 createSpeedControl(Player)
 createToggle("Noclip", Player, "NOCLIP_ON")
 
--- LÓGICAS (TALAR / FOGATA / MOVIMIENTO)
+-- LÓGICA AUTO TALAR ORIGINAL (RESTABLECIDA)
 task.spawn(function()
     while task.wait(0.1) do
         if _G.AutoTalar then
             pcall(function()
                 local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
-                for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
-                    local t = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees"):FindFirstChildWhichIsA("Model")
-                    if t then remote:FireServer(t, "tree", 43); break end
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                if remote and tool then
+                    for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
+                        local treesFolder = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
+                        if treesFolder then
+                            local target = treesFolder:FindFirstChildWhichIsA("Model")
+                            if target then
+                                remote:FireServer(target, "tree", 43)
+                                tool:Activate()
+                                break 
+                            end
+                        end
+                    end
                 end
             end)
         end
@@ -128,13 +118,14 @@ task.spawn(function()
     end
 end)
 
+-- MOVIMIENTO
 RS.Stepped:Connect(function()
     pcall(function()
         if LP.Character then
             if _G.NOCLIP_ON then for _, p in pairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end
             if _G.SPEED_ON and LP.Character:FindFirstChild("HumanoidRootPart") then
                 local h = LP.Character.Humanoid
-                if h.MoveDirection.Magnitude > 0 then LP.Character.HumanoidRootPart.CFrame += h.MoveDirection * ((_G.SPD_VAL - 16) / 45) end
+                if h and h.MoveDirection.Magnitude > 0 then LP.Character.HumanoidRootPart.CFrame += h.MoveDirection * ((_G.SPD_VAL - 16) / 45) end
             end
         end
     end)
