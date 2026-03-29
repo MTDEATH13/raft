@@ -1,7 +1,6 @@
--- [[ POTO1 HUB - VERSION FINAL GITHUB ]]
+-- VERSION ULTRA LIGERA
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
-
 _G.PotoConfig = {Talar = false, Fire = false, Noclip = false, Speed = false, SpdVal = 16}
 
 local pgui = LP:WaitForChild("PlayerGui")
@@ -10,27 +9,21 @@ if pgui:FindFirstChild("PotoHub") then pgui.PotoHub:Destroy() end
 local sg = Instance.new("ScreenGui", pgui); sg.Name = "PotoHub"
 local main = Instance.new("Frame", sg)
 main.Size = UDim2.new(0, 180, 0, 310); main.Position = UDim2.new(0.1, 0, 0.4, 0)
-main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+main.BackgroundColor3 = Color3.new(0,0,0)
 main.Active = true; main.Draggable = true
 
-local function crearBoton(txt, y, cb)
+local function btn(txt, y, cb)
     local b = Instance.new("TextButton", main)
     b.Size = UDim2.new(0.9, 0, 0, 35); b.Position = UDim2.new(0.05, 0, 0, y)
-    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(35, 35, 35); b.TextColor3 = Color3.new(1, 1, 1)
+    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.TextColor3 = Color3.new(1,1,1)
     b.MouseButton1Click:Connect(function() cb(b) end)
     return b
 end
 
-crearBoton("TALAR: OFF", 15, function(b) _G.PotoConfig.Talar = not _G.PotoConfig.Talar; b.Text = "TALAR: "..(_G.PotoConfig.Talar and "ON" or "OFF") end)
-crearBoton("NOCLIP: OFF", 55, function(b) _G.PotoConfig.Noclip = not _G.PotoConfig.Noclip; b.Text = "NOCLIP: "..(_G.PotoConfig.Noclip and "ON" or "OFF") end)
-crearBoton("FIRE: OFF", 95, function(b) _G.PotoConfig.Fire = not _G.PotoConfig.Fire; b.Text = "FIRE: "..(_G.PotoConfig.Fire and "ON" or "OFF") end)
-crearBoton("SPEED: OFF", 135, function(b) _G.PotoConfig.Speed = not _G.PotoConfig.Speed; b.Text = "SPEED: "..(_G.PotoConfig.Speed and "ON" or "OFF") end)
-
-local label = Instance.new("TextLabel", main); label.Size = UDim2.new(0.9, 0, 0, 20); label.Position = UDim2.new(0.05, 0, 0, 175); label.Text = "VALOR: 16"; label.TextColor3 = Color3.new(1, 1, 1); label.BackgroundTransparency = 1
-
-crearBoton("-5", 200, function() _G.PotoConfig.SpdVal = math.max(16, _G.PotoConfig.SpdVal - 5); label.Text = "VALOR: ".._G.PotoConfig.SpdVal end).Size = UDim2.new(0.42, 0, 0, 35)
-local p5 = crearBoton("+5", 200, function() _G.PotoConfig.SpdVal = _G.PotoConfig.SpdVal + 5; label.Text = "VALOR: ".._G.PotoConfig.SpdVal end); p5.Size = UDim2.new(0.42, 0, 0, 35); p5.Position = UDim2.new(0.53, 0, 0, 200)
-crearBoton("CERRAR", 260, function() sg:Destroy() end)
+btn("TALAR: OFF", 15, function(b) _G.PotoConfig.Talar = not _G.PotoConfig.Talar; b.Text = "TALAR: "..(_G.PotoConfig.Talar and "ON" or "OFF") end)
+btn("NOCLIP: OFF", 55, function(b) _G.PotoConfig.Noclip = not _G.PotoConfig.Noclip; b.Text = "NOCLIP: "..(_G.PotoConfig.Noclip and "ON" or "OFF") end)
+btn("FIRE: OFF", 95, function(b) _G.PotoConfig.Fire = not _G.PotoConfig.Fire; b.Text = "FIRE: "..(_G.PotoConfig.Fire and "ON" or "OFF") end)
+btn("SPEED: OFF", 135, function(b) _G.PotoConfig.Speed = not _G.PotoConfig.Speed; b.Text = "SPEED: "..(_G.PotoConfig.Speed and "ON" or "OFF") end)
 
 RS.Stepped:Connect(function()
     pcall(function()
@@ -39,10 +32,7 @@ RS.Stepped:Connect(function()
                 for _, p in pairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
             end
             if _G.PotoConfig.Speed and LP.Character:FindFirstChild("HumanoidRootPart") then
-                local hum = LP.Character:FindFirstChild("Humanoid")
-                if hum and hum.MoveDirection.Magnitude > 0 then
-                    LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (hum.MoveDirection * ((_G.PotoConfig.SpdVal - 16) / 30))
-                end
+                LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (LP.Character.Humanoid.MoveDirection * ((_G.PotoConfig.SpdVal - 16) / 30))
             end
         end
     end)
@@ -64,10 +54,6 @@ task.spawn(function()
                         end
                     end
                 end
-            end
-            if _G.PotoConfig.Fire then
-                local base = workspace._Raft.Campfire.Base
-                for _, log in pairs(workspace._Carryables:GetChildren()) do if log.Name == "Log" then (log:FindFirstChild("Part") or log).CFrame = base.CFrame end end
             end
         end)
     end
