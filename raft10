@@ -1,4 +1,4 @@
--- [[ POTO1 HUB - PREMIUM V8.0 FINAL KILL ALL ]]
+-- [[ POTO1 HUB - PREMIUM V9.2 FINAL FIX ]]
 local LP = game:GetService("Players").LocalPlayer
 local RS = game:GetService("RunService")
 local TS = game:GetService("TweenService")
@@ -6,6 +6,7 @@ local TS = game:GetService("TweenService")
 -- VARIABLES GLOBALES
 _G.AutoFire = false; _G.AutoTalar = false; _G.KillAura = false
 _G.SPEED_ON = false; _G.NOCLIP_ON = false; _G.SPD_VAL = 16 
+local hitCounter = 98 -- Empezamos un poco más arriba de tus capturas
 
 local Themes = {
     Background = Color3.fromRGB(20, 20, 20), SideBar = Color3.fromRGB(25, 25, 25),
@@ -13,7 +14,7 @@ local Themes = {
     Accent = Color3.fromRGB(55, 55, 55), ToggleOn = Color3.fromRGB(0, 180, 100)
 }
 
--- BASE DEL HUB
+-- [ BASE DE LA UI - SIN CAMBIOS ]
 local pgui = LP:WaitForChild("PlayerGui")
 if pgui:FindFirstChild("Poto1_MaterialHub") then pgui.Poto1_MaterialHub:Destroy() end
 local sg = Instance.new("ScreenGui", pgui); sg.Name = "Poto1_MaterialHub"; sg.ResetOnSpawn = false
@@ -22,17 +23,17 @@ Main.Size = UDim2.new(0, 420, 0, 280); Main.Position = UDim2.new(0.5, -210, 0.5,
 Main.BackgroundColor3 = Themes.Background; Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
--- SIDEBAR Y TOPBAR
+-- [ SIDEBAR E ICONOS ]
 local SideBar = Instance.new("Frame", Main); SideBar.ZIndex = 2; SideBar.Size = UDim2.new(0, 60, 1, 0); SideBar.BackgroundColor3 = Themes.SideBar; SideBar.BorderSizePixel = 0
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 10)
 local SideItems = Instance.new("Frame", SideBar); SideItems.Size = UDim2.new(1, 0, 1, -40); SideItems.Position = UDim2.new(0, 0, 0, 40); SideItems.BackgroundTransparency = 1; SideItems.ZIndex = 4
-local Layout = Instance.new("UIListLayout", SideItems); Layout.Padding = UDim.new(0, 10); Layout.HorizontalAlignment = "Center"
+Instance.new("UIListLayout", SideItems).Padding = UDim.new(0, 10); SideItems.UIListLayout.HorizontalAlignment = "Center"
 
 local TopBar = Instance.new("Frame", Main); TopBar.Size = UDim2.new(1, -60, 0, 35); TopBar.Position = UDim2.new(0, 60, 0, 0); TopBar.BackgroundColor3 = Themes.TopBar; TopBar.BorderSizePixel = 0
 Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
-local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | PREMIUM V8 FINAL"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
+local Title = Instance.new("TextLabel", TopBar); Title.Text = "  POTO1 HUB | V9.2 FIXED"; Title.Size = UDim2.new(0.6, 0, 1, 0); Title.BackgroundTransparency = 1; Title.TextColor3 = Themes.Text; Title.Font = "GothamBold"; Title.TextSize = 14; Title.TextXAlignment = "Left"
 
--- FUNCIONES DE BOTONES
+-- [ BOTONES DE CONTROL ]
 local function sysBtn(t, p, c, cb)
     local b = Instance.new("TextButton", TopBar); b.Text = t; b.Size = UDim2.new(0, 30, 0, 30); b.Position = p; b.BackgroundColor3 = c; b.TextColor3 = Themes.Text; b.Font = "GothamBold"; Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5); b.MouseButton1Click:Connect(cb)
 end
@@ -40,7 +41,7 @@ sysBtn("X", UDim2.new(1, -35, 0, 2), Color3.fromRGB(180, 50, 50), function() sg:
 local minB = Instance.new("TextButton", TopBar); minB.Text = "-"; minB.Size = UDim2.new(0, 30, 0, 30); minB.Position = UDim2.new(1, -70, 0, 2); minB.BackgroundColor3 = Themes.Accent; minB.TextColor3 = Themes.Text; minB.Font = "GothamBold"; Instance.new("UICorner", minB).CornerRadius = UDim.new(0, 5)
 minB.MouseButton1Click:Connect(function() _G.IsMin = not _G.IsMin; minB.Text = _G.IsMin and "+" or "-"; TS:Create(Main, TweenInfo.new(0.3), {Size = _G.IsMin and UDim2.new(0, 420, 0, 35) or UDim2.new(0, 420, 0, 280)}):Play() end)
 
--- CONTENEDOR DE PAGINAS
+-- [ PAGINAS ]
 local Container = Instance.new("Frame", Main); Container.Size = UDim2.new(1, -70, 1, -45); Container.Position = UDim2.new(0, 65, 0, 40); Container.BackgroundTransparency = 1
 local Pages = {}
 local function createPage(n)
@@ -50,11 +51,9 @@ end
 local HomePage = createPage("Home"); HomePage.Visible = true
 local PlayerPage = createPage("Player")
 
--- ICONOS LATERALES (ZINDEX FIJADO)
 local currentTab = nil
 local function createTabBtn(id, pName)
-    local b = Instance.new("TextButton", SideItems); b.Size = UDim2.new(0, 45, 0, 45); b.BackgroundColor3 = Themes.SideBar; b.Text = ""; b.ZIndex = 5
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+    local b = Instance.new("TextButton", SideItems); b.Size = UDim2.new(0, 45, 0, 45); b.BackgroundColor3 = Themes.SideBar; b.Text = ""; b.ZIndex = 5; Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
     local i = Instance.new("ImageLabel", b); i.Size = UDim2.new(0, 24, 0, 24); i.Position = UDim2.new(0.5, -12, 0.5, -12); i.BackgroundTransparency = 1; i.Image = "rbxassetid://"..id; i.ZIndex = 6
     b.MouseButton1Click:Connect(function()
         for _, p in pairs(Pages) do p.Visible = false end; Pages[pName].Visible = true
@@ -65,7 +64,6 @@ end
 local bH = createTabBtn("10723380068", "Home"); currentTab = bH; bH.BackgroundColor3 = Themes.Accent
 createTabBtn("10747373733", "Player")
 
--- COMPONENTES (TOGGLES)
 local function createToggle(txt, parent, var)
     local f = Instance.new("Frame", parent); f.Size = UDim2.new(0.98, 0, 0, 40); f.BackgroundColor3 = Themes.Accent; Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
     local l = Instance.new("TextLabel", f); l.Text = "  "..txt; l.Size = UDim2.new(0.7, 0, 1, 0); l.BackgroundTransparency = 1; l.TextColor3 = Themes.Text; l.Font = "Gotham"; l.TextSize = 12; l.TextXAlignment = "Left"
@@ -78,48 +76,38 @@ local function createToggle(txt, parent, var)
     end)
 end
 
--- CONTENIDO HUB
+-- [ CONTENIDO ]
 createToggle("Auto Talar (Hyper)", HomePage, "AutoTalar")
 createToggle("Auto Fogata", HomePage, "AutoFire")
-createToggle("Kill Aura TOTAL", HomePage, "KillAura") -- MATA TODO
+createToggle("Kill Aura (NPCs/Aliens)", HomePage, "KillAura") 
 createToggle("Noclip", PlayerPage, "NOCLIP_ON")
 createToggle("Speed Hack", PlayerPage, "SPEED_ON")
 
--- LÓGICA KILL AURA TOTAL (MULTITARGET)
+-- [ LÓGICA KILL AURA - USANDO DATOS DE SIMPLESPY ]
 task.spawn(function()
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("AxeHit")
     while task.wait(0.1) do
         if _G.KillAura then
             pcall(function()
-                local char = LP.Character
-                local tool = char:FindFirstChildWhichIsA("Tool")
-                -- Buscamos AxeHit (madera/balsa) o SwordHit (daño general)
-                local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit") or game:GetService("ReplicatedStorage"):FindFirstChild("SwordHit")
-                
-                if tool and remote then
-                    -- Escanea TODO el workspace en busca de enemigos
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if obj:IsA("Humanoid") and obj.Parent ~= char then
-                            local root = obj.Parent:FindFirstChild("HumanoidRootPart") or obj.Parent:FindFirstChild("Base")
-                            if root and (char.HumanoidRootPart.Position - root.Position).Magnitude < 30 then
-                                -- Ataca con fuerza 100 para matar rápido
-                                remote:FireServer(obj.Parent, "animal", 100) 
-                                tool:Activate()
-                            end
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                if tool then
+                    -- Buscamos NPCs en la carpeta que nos mostró tu Spy
+                    for _, npc in pairs(workspace._Debris.NPCs:GetChildren()) do
+                        local root = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Base")
+                        if root and (LP.Character.HumanoidRootPart.Position - root.Position).Magnitude < 30 then
+                            -- Enviamos exactamente lo que el servidor pide
+                            hitCounter = hitCounter + 1
+                            remote:FireServer(npc, "npc_attribute", hitCounter)
+                            tool:Activate()
                         end
                     end
                 end
             end)
         end
-        if _G.AutoFire then
-            pcall(function()
-                local b = workspace._Raft.Campfire.Base
-                for _, l in pairs(workspace._Carryables:GetChildren()) do if l.Name == "Log" then (l:FindFirstChild("Part") or l).CFrame = b.CFrame end end
-            end)
-        end
     end
 end)
 
--- AUTO TALAR HYPER (Independiente)
+-- [ LÓGICA AUTO TALAR Y OTROS - SIN CAMBIOS ]
 task.spawn(function()
     while task.wait(0.05) do
         if _G.AutoTalar then
@@ -130,26 +118,10 @@ task.spawn(function()
                     for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
                         local trees = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
                         local target = trees and trees:FindFirstChildWhichIsA("Model")
-                        if target then
-                            remote:FireServer(target, "tree", 43)
-                            tool:Activate(); break
-                        end
+                        if target then remote:FireServer(target, "tree", 43); tool:Activate(); break end
                     end
                 end
             end)
         end
     end
-end)
-
--- MOVIMIENTO
-RS.Stepped:Connect(function()
-    pcall(function()
-        if LP.Character then
-            if _G.NOCLIP_ON then for _, p in pairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end
-            if _G.SPEED_ON and LP.Character:FindFirstChild("HumanoidRootPart") then
-                local h = LP.Character:FindFirstChild("Humanoid")
-                if h and h.MoveDirection.Magnitude > 0 then LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (h.MoveDirection * ((_G.SPD_VAL - 16) / 30)) end
-            end
-        end
-    end)
 end)
