@@ -1,60 +1,14 @@
--- VERSION ULTRA LIGERA
 local LP = game:GetService("Players").LocalPlayer
-local RS = game:GetService("RunService")
-_G.PotoConfig = {Talar = false, Fire = false, Noclip = false, Speed = false, SpdVal = 16}
-
 local pgui = LP:WaitForChild("PlayerGui")
 if pgui:FindFirstChild("PotoHub") then pgui.PotoHub:Destroy() end
 
 local sg = Instance.new("ScreenGui", pgui); sg.Name = "PotoHub"
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 180, 0, 310); main.Position = UDim2.new(0.1, 0, 0.4, 0)
-main.BackgroundColor3 = Color3.new(0,0,0)
-main.Active = true; main.Draggable = true
+main.Size = UDim2.new(0, 180, 0, 100); main.Position = UDim2.new(0.1, 0, 0.4, 0)
+main.BackgroundColor3 = Color3.new(0,0,0); main.Active = true; main.Draggable = true
 
-local function btn(txt, y, cb)
-    local b = Instance.new("TextButton", main)
-    b.Size = UDim2.new(0.9, 0, 0, 35); b.Position = UDim2.new(0.05, 0, 0, y)
-    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(40,40,40); b.TextColor3 = Color3.new(1,1,1)
-    b.MouseButton1Click:Connect(function() cb(b) end)
-    return b
-end
+local b = Instance.new("TextButton", main)
+b.Size = UDim2.new(0.9, 0, 0, 40); b.Position = UDim2.new(0.05, 0, 0.3, 0)
+b.Text = "POTO1: FUNCIONANDO"; b.BackgroundColor3 = Color3.fromRGB(50,50,50); b.TextColor3 = Color3.new(1,1,1)
 
-btn("TALAR: OFF", 15, function(b) _G.PotoConfig.Talar = not _G.PotoConfig.Talar; b.Text = "TALAR: "..(_G.PotoConfig.Talar and "ON" or "OFF") end)
-btn("NOCLIP: OFF", 55, function(b) _G.PotoConfig.Noclip = not _G.PotoConfig.Noclip; b.Text = "NOCLIP: "..(_G.PotoConfig.Noclip and "ON" or "OFF") end)
-btn("FIRE: OFF", 95, function(b) _G.PotoConfig.Fire = not _G.PotoConfig.Fire; b.Text = "FIRE: "..(_G.PotoConfig.Fire and "ON" or "OFF") end)
-btn("SPEED: OFF", 135, function(b) _G.PotoConfig.Speed = not _G.PotoConfig.Speed; b.Text = "SPEED: "..(_G.PotoConfig.Speed and "ON" or "OFF") end)
-
-RS.Stepped:Connect(function()
-    pcall(function()
-        if LP.Character then
-            if _G.PotoConfig.Noclip then
-                for _, p in pairs(LP.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
-            end
-            if _G.PotoConfig.Speed and LP.Character:FindFirstChild("HumanoidRootPart") then
-                LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (LP.Character.Humanoid.MoveDirection * ((_G.PotoConfig.SpdVal - 16) / 30))
-            end
-        end
-    end)
-end)
-
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            if _G.PotoConfig.Talar then
-                local rem = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
-                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
-                if tool and rem then
-                    for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
-                        local trees = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
-                        local tree = trees and trees:FindFirstChildWhichIsA("Model")
-                        if tree then
-                            for i = 43, 1, -2 do if not _G.PotoConfig.Talar or not tree.Parent then break end; rem:FireServer(tree, "tree", i); tool:Activate() end
-                            break
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
+print("POTO1 Cargado con éxito")
