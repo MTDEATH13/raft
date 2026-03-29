@@ -86,7 +86,6 @@ end)
 -- MOTOR HYPER-DRIVE (TALAR Y FIRE)
 task.spawn(function()
     while task.wait(0.05) do 
-        -- AUTO-TALAR HYPER-BURST
         if _G.AutoTalar then
             pcall(function()
                 local remote = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
@@ -103,7 +102,7 @@ task.spawn(function()
                     end
 
                     if targetTree then
-                        -- Secuencia de ráfaga rápida
+                        -- Secuencia de ráfaga rápida (Hyper-Burst)
                         for i = 43, 1, -5 do 
                             if not targetTree.Parent or not _G.AutoTalar then break end
                             remote:FireServer(targetTree, "tree", i)
@@ -117,7 +116,6 @@ task.spawn(function()
             end)
         end
 
-        -- AUTO-FIRE
         if _G.AutoFire then
             pcall(function()
                 local base = workspace._Raft.Campfire.Base
