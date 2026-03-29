@@ -1,14 +1,122 @@
+-- [[ POTO1 HUB v58 - VERSION GITHUB OFICIAL ]]
 local LP = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+
+-- 1. CONFIGURACION GLOBAL
+_G.PotoConfig = {
+    Talar = false,
+    Fire = false,
+    Noclip = false,
+    Speed = false,
+    SpdVal = 16
+}
+
+-- 2. INTERFAZ (TU DISEÑO V58)
 local pgui = LP:WaitForChild("PlayerGui")
 if pgui:FindFirstChild("PotoHub") then pgui.PotoHub:Destroy() end
 
 local sg = Instance.new("ScreenGui", pgui); sg.Name = "PotoHub"
 local main = Instance.new("Frame", sg)
-main.Size = UDim2.new(0, 180, 0, 100); main.Position = UDim2.new(0.1, 0, 0.4, 0)
-main.BackgroundColor3 = Color3.new(0,0,0); main.Active = true; main.Draggable = true
+main.Size = UDim2.new(0, 180, 0, 310); main.Position = UDim2.new(0.1, 0, 0.4, 0)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); main.Active = true; main.Draggable = true
 
-local b = Instance.new("TextButton", main)
-b.Size = UDim2.new(0.9, 0, 0, 40); b.Position = UDim2.new(0.05, 0, 0.3, 0)
-b.Text = "POTO1: FUNCIONANDO"; b.BackgroundColor3 = Color3.fromRGB(50,50,50); b.TextColor3 = Color3.new(1,1,1)
+local function btn(txt, y, cb)
+    local b = Instance.new("TextButton", main)
+    b.Size = UDim2.new(0.9, 0, 0, 35); b.Position = UDim2.new(0.05, 0, 0, y)
+    b.Text = txt; b.BackgroundColor3 = Color3.fromRGB(35, 35, 35); b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.GothamBold; b.TextSize = 12
+    b.MouseButton1Click:Connect(function() cb(b) end)
+    return b
+end
 
-print("POTO1 Cargado con éxito")
+-- 3. BOTONES DE ACCION
+btn("AUTO TALAR: OFF", 15, function(b) 
+    _G.PotoConfig.Talar = not _G.PotoConfig.Talar
+    b.Text = "TALAR: " .. (_G.PotoConfig.Talar and "ON" or "OFF")
+end)
+
+btn("NOCLIP: OFF", 55, function(b) 
+    _G.PotoConfig.Noclip = not _G.PotoConfig.Noclip
+    b.Text = "NOCLIP: " .. (_G.PotoConfig.Noclip and "ON" or "OFF")
+end)
+
+btn("AUTO FIRE: OFF", 95, function(b) 
+    _G.PotoConfig.Fire = not _G.PotoConfig.Fire
+    b.Text = "FIRE: " .. (_G.PotoConfig.Fire and "ON" or "OFF")
+end)
+
+btn("SPEED: OFF", 135, function(b) 
+    _G.PotoConfig.Speed = not _G.PotoConfig.Speed
+    b.Text = "SPEED: " .. (_G.PotoConfig.Speed and "ON" or "OFF")
+end)
+
+local label = Instance.new("TextLabel", main)
+label.Size = UDim2.new(0.9, 0, 0, 20); label.Position = UDim2.new(0.05, 0, 0, 175)
+label.Text = "VALOR: 16"; label.BackgroundTransparency = 1; label.TextColor3 = Color3.new(1, 1, 1)
+
+btn("-5", 200, function() 
+    _G.PotoConfig.SpdVal = math.max(16, _G.PotoConfig.SpdVal - 5)
+    label.Text = "VALOR: " .. _G.PotoConfig.SpdVal
+end).Size = UDim2.new(0.42, 0, 0, 35)
+
+local p5 = btn("+5", 200, function() 
+    _G.PotoConfig.SpdVal = _G.PotoConfig.SpdVal + 5
+    label.Text = "VALOR: " .. _G.PotoConfig.SpdVal
+end)
+p5.Size = UDim2.new(0.42, 0, 0, 35); p5.Position = UDim2.new(0.53, 0, 0, 200)
+
+btn("CERRAR SCRIPT", 260, function() sg:Destroy() end).BackgroundColor3 = Color3.fromRGB(80, 20, 20)
+
+-- 4. LOGICA DE MOVIMIENTO (NOCLIP + SPEED)
+RS.Stepped:Connect(function()
+    pcall(function()
+        if LP.Character then
+            -- Tu Noclip Verificado
+            if _G.PotoConfig.Noclip then
+                for _, p in pairs(LP.Character:GetDescendants()) do
+                    if p:IsA("BasePart") then p.CanCollide = false end
+                end
+            end
+            -- Tu Speed Ajustable
+            if _G.PotoConfig.Speed and LP.Character:FindFirstChild("HumanoidRootPart") then
+                local hum = LP.Character:FindFirstChild("Humanoid")
+                if hum and hum.MoveDirection.Magnitude > 0 then
+                    LP.Character.HumanoidRootPart.CFrame = LP.Character.HumanoidRootPart.CFrame + (hum.MoveDirection * ((_G.PotoConfig.SpdVal - 16) / 30))
+                end
+            end
+        end
+    end)
+end)
+
+-- 5. LOGICA DE FARMEO (TALAR + FIRE)
+task.spawn(function()
+    while task.wait(0.2) do
+        pcall(function()
+            if _G.PotoConfig.Talar then
+                local rem = game:GetService("ReplicatedStorage"):FindFirstChild("AxeHit")
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                if tool and rem then
+                    for _, isl in pairs(workspace._Debris.Islands:GetChildren()) do
+                        local trees = isl:FindFirstChild("Objects") and isl.Objects:FindFirstChild("Trees")
+                        local tree = trees and trees:FindFirstChildWhichIsA("Model")
+                        if tree then
+                            for i = 43, 1, -2 do
+                                if not _G.PotoConfig.Talar or not tree.Parent then break end
+                                rem:FireServer(tree, "tree", i); tool:Activate()
+                            end
+                            break
+                        end
+                    end
+                end
+            end
+            if _G.PotoConfig.Fire then
+                local base = workspace._Raft.Campfire.Base
+                for _, log in pairs(workspace._Carryables:GetChildren()) do
+                    if log.Name == "Log" then (log:FindFirstChild("Part") or log).CFrame = base.CFrame end
+                end
+            end
+        end)
+    end
+end)
+
+print("POTO1: Cargado con éxito desde GitHub.")
