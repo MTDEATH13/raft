@@ -1,0 +1,102 @@
+-- [[ POTO1 HUB - V18.2 AUTO-TALAR FIX ]]
+local LP = game:GetService("Players").LocalPlayer
+local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+_G.AutoTalar = false
+_G.AutoFire = false
+_G.AuraActive = false
+_G.SPEED_ON = false
+_G.NOCLIP_ON = false
+_G.SPD_VAL = 16 
+local HitCounter = 0
+
+-- UI PREMIUM
+local pgui = LP:WaitForChild("PlayerGui")
+if pgui:FindFirstChild("Poto1_V18") then pgui.Poto1_V18:Destroy() end
+local sg = Instance.new("ScreenGui", pgui); sg.Name = "Poto1_V18"; sg.ResetOnSpawn = false
+local Main = Instance.new("Frame", sg)
+Main.Size = UDim2.new(0, 420, 0, 320); Main.Position = UDim2.new(0.5, -210, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(15,15,15); Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+
+-- [BARRA LATERAL Y TOPBAR IGUAL QUE ANTES...]
+local SideBar = Instance.new("Frame", Main); SideBar.Size = UDim2.new(0, 60, 1, 0); SideBar.BackgroundColor3 = Color3.fromRGB(20,20,20); SideBar.BorderSizePixel = 0
+local TopBar = Instance.new("Frame", Main); TopBar.Size = UDim2.new(1, -60, 0, 35); TopBar.Position = UDim2.new(0, 60, 0, 0); TopBar.BackgroundColor3 = Color3.fromRGB(25,25,25); TopBar.BorderSizePixel = 0
+local closeB = Instance.new("TextButton", TopBar); closeB.Text = "X"; closeB.Size = UDim2.new(0, 30, 0, 30); closeB.Position = UDim2.new(1, -35, 0, 2.5); closeB.BackgroundColor3 = Color3.fromRGB(180, 50, 50); closeB.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", closeB).CornerRadius = UDim.new(0, 5)
+closeB.MouseButton1Click:Connect(function() sg:Destroy() end)
+
+-- CONTENEDORES
+local Container = Instance.new("Frame", Main); Container.Size = UDim2.new(1, -70, 1, -45); Container.Position = UDim2.new(0, 65, 0, 40); Container.BackgroundTransparency = 1
+local Home = Instance.new("ScrollingFrame", Container); Home.Size = UDim2.new(1, 0, 1, 0); Home.BackgroundTransparency = 1; Home.ScrollBarThickness = 0
+Instance.new("UIListLayout", Home).Padding = UDim.new(0, 6)
+
+local function createToggle(txt, var)
+    local f = Instance.new("Frame", Home); f.Size = UDim2.new(0.98, 0, 0, 38); f.BackgroundColor3 = Color3.fromRGB(45,45,45); Instance.new("UICorner", f).CornerRadius = UDim.new(0, 6)
+    local l = Instance.new("TextLabel", f); l.Text = "  "..txt; l.Size = UDim2.new(0.7, 0, 1, 0); l.BackgroundTransparency = 1; l.TextColor3 = Color3.new(1,1,1); l.Font = "Gotham"; l.TextSize = 12; l.TextXAlignment = "Left"
+    local bt = Instance.new("TextButton", f); bt.Text = ""; bt.Size = UDim2.new(0, 35, 0, 18); bt.Position = UDim2.new(1, -45, 0.5, -9); bt.BackgroundColor3 = Color3.fromRGB(80, 80, 80); Instance.new("UICorner", bt).CornerRadius = UDim.new(1, 0)
+    bt.MouseButton1Click:Connect(function() _G[var] = not _G[var]; bt.BackgroundColor3 = _G[var] and Color3.fromRGB(0, 180, 100) or Color3.fromRGB(80, 80, 80) end)
+end
+
+createToggle("Auto Talar FIX", "AutoTalar")
+createToggle("Auto Fogata", "AutoFire")
+createToggle("Kill Aura Fix Giro", "AuraActive")
+
+-- LÓGICA AUTO TALAR (CORREGIDA AL 100%)
+task.spawn(function()
+    while task.wait(0.3) do -- Intervalo de escaneo estable
+        if _G.AutoTalar then
+            pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("AxeHit")
+                local tool = LP.Character:FindFirstChildWhichIsA("Tool")
+                
+                -- Verificamos si tienes el hacha o cuchillo en la mano
+                if remote and tool then
+                    local debris = workspace:FindFirstChild("_Debris")
+                    local islands = debris and debris:FindFirstChild("Islands")
+                    
+                    if islands then
+                        for _, isl in pairs(islands:GetChildren()) do
+                            local obj = isl:FindFirstChild("Objects")
+                            local trees = obj and obj:FindFirstChild("Trees")
+                            
+                            if trees then
+                                local target = trees:FindFirstChildWhichIsA("Model")
+                                if target then
+                                    -- TALADO SECUENCIAL (No Hyper para evitar bloqueo del server)
+                                    for i = 43, 0, -5 do -- Bajamos de 5 en 5 para ser rápidos pero seguros
+                                        if not _G.AutoTalar or not target.Parent then break end
+                                        remote:FireServer(target, "tree", i)
+                                        tool:Activate()
+                                        task.wait(0.05) -- Pausa mínima para que el server registre el daño
+                                    end
+                                    break 
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- [RESTO DE LÓGICAS DE MOVIMIENTO Y KILL AURA...]
+task.spawn(function()
+    while task.wait(0.2) do
+        if _G.AuraActive then
+            pcall(function()
+                local root = LP.Character.HumanoidRootPart
+                for _, npc in pairs(workspace._Debris.NPCs:GetChildren()) do
+                    local tPart = npc:FindFirstChild("HumanoidRootPart") or npc:FindFirstChild("Part")
+                    if tPart and (root.Position - tPart.Position).Magnitude <= 60 then
+                        HitCounter = (HitCounter % 50) + 1
+                        local mode = (npc:FindFirstChild("Humanoid")) and "npc_humanoid" or "npc_attribute"
+                        ReplicatedStorage.AxeHit:FireServer(npc, mode, HitCounter)
+                    end
+                end
+            end)
+        end
+    end
+end)
